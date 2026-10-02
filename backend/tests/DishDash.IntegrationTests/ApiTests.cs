@@ -11,7 +11,11 @@ public sealed partial class ApiTests : IAsyncLifetime
 {
     private readonly AppFactory factory = new();
     public Task InitializeAsync() => factory.Initialize();
-    public Task DisposeAsync() { factory.Dispose(); return Task.CompletedTask; }
+    public async Task DisposeAsync()
+    {
+        try { await factory.CleanupDatabaseAsync(); }
+        finally { await factory.DisposeAsync(); }
+    }
     private HttpClient Client() => factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
     private static async Task Csrf(HttpClient client)
     {

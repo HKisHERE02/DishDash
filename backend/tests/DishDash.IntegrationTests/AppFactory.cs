@@ -9,11 +9,13 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
 namespace DishDash.IntegrationTests;
 
-public sealed class AppFactory(string environment = "Testing") : WebApplicationFactory<Program>
+public class AppFactory(string environment = "Testing") : WebApplicationFactory<Program>
 {
     private readonly string database = Path.Combine(Path.GetTempPath(), $"dishdash-tests-{Guid.NewGuid()}.db");
     private readonly string? postgresConnection = TestPostgresConnection();
-    private bool initialized;
+    private bool databaseInitializationStarted;
+    private Task? cleanupTask;
+    private Task? disposalTask;
     private static string? TestPostgresConnection()
     {
         var configured = Environment.GetEnvironmentVariable("DISHDASH_TEST_POSTGRES");
@@ -38,24 +40,35 @@ public sealed class AppFactory(string environment = "Testing") : WebApplicationF
     }
     public async Task Initialize()
     {
-        using var scope = Services.CreateScope();
+        await using var scope = Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<DishDashDbContext>();
+        // Migrations can create the database before failing to create its schema.
+        databaseInitializationStarted = true;
         if (postgresConnection is null) await db.Database.EnsureCreatedAsync();
         else await db.Database.MigrateAsync();
-        initialized = true;
         await DemoSeed.Initialize(db, scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>(), null);
     }
-    protected override void Dispose(bool disposing)
+
+    public Task CleanupDatabaseAsync() => cleanupTask ??= CleanupDatabaseCoreAsync();
+
+    private async Task CleanupDatabaseCoreAsync()
     {
-        if (disposing && initialized && postgresConnection is not null)
+        if (!databaseInitializationStarted) return;
+        if (postgresConnection is not null)
         {
-            using var scope = Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<DishDashDbContext>();
             var name = new NpgsqlConnectionStringBuilder(postgresConnection).Database;
             if (name is null || !name.StartsWith("dishdash_test_", StringComparison.Ordinal)) throw new InvalidOperationException("Refusing to remove a non-test database.");
-            db.Database.EnsureDeleted();
         }
-        base.Dispose(disposing);
-        if (disposing) { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); if (File.Exists(database)) File.Delete(database); }
+        await using var scope = Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<DishDashDbContext>();
+        await db.Database.EnsureDeletedAsync().ConfigureAwait(false);
+    }
+
+    public override ValueTask DisposeAsync() => new(disposalTask ??= DisposeCoreAsync());
+
+    private async Task DisposeCoreAsync()
+    {
+        try { await CleanupDatabaseAsync().ConfigureAwait(false); }
+        finally { await base.DisposeAsync().ConfigureAwait(false); }
     }
 }

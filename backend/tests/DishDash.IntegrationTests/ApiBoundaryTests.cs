@@ -13,7 +13,7 @@ public sealed partial class ApiTests
     {
         using var client = Client();
         Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync("/api/openapi/v1.json")).StatusCode);
-        using var development = new AppFactory("Development");
+        await using var development = new AppFactory("Development");
         await development.Initialize();
         using var devClient = development.CreateClient();
         var document = await devClient.GetFromJsonAsync<JsonElement>("/api/openapi/v1.json");

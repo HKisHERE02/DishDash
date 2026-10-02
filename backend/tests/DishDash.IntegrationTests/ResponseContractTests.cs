@@ -96,7 +96,7 @@ public sealed partial class ApiTests
     [InlineData("/api/dishes/1/comparison?servings=0", 400)]
     public async Task ProductionResponsesIncludeSafeHeadersEvenOnErrors(string path, int status)
     {
-        using var production = new AppFactory("Production");
+        await using var production = new AppFactory("Production");
         await production.Initialize();
         using var client = production.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost"), AllowAutoRedirect = false });
         using var response = await client.GetAsync(path);
@@ -110,7 +110,7 @@ public sealed partial class ApiTests
     [Fact]
     public async Task OpenApiDescribesPublicResponseContracts()
     {
-        using var development = new AppFactory("Development");
+        await using var development = new AppFactory("Development");
         await development.Initialize();
         using var client = development.CreateClient();
         var document = await client.GetFromJsonAsync<JsonElement>("/api/openapi/v1.json");
