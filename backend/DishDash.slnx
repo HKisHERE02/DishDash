@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DishDash.Api/DishDash.Api.csproj" />
+    <Project Path="src/DishDash.Application/DishDash.Application.csproj" />
+    <Project Path="src/DishDash.Domain/DishDash.Domain.csproj" />
+    <Project Path="src/DishDash.Infrastructure/DishDash.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DishDash.BrowserHost/DishDash.BrowserHost.csproj" />
+    <Project Path="tests/DishDash.IntegrationTests/DishDash.IntegrationTests.csproj" />
+    <Project Path="tests/DishDash.UnitTests/DishDash.UnitTests.csproj" />
+  </Folder>
+</Solution>
