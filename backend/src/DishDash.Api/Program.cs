@@ -62,6 +62,7 @@ app.UseExceptionHandler(handler => handler.Run(async context =>
     await context.Response.WriteAsJsonAsync(new { title = status == 400 && error is RuleException ? error.Message : status == 409 ? "The data changed. Refresh and try again." : "We could not complete this request. Please try again." });
 }));
 if (app.Environment.IsProduction()) { app.UseHsts(); app.UseHttpsRedirection(); }
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
@@ -79,6 +80,7 @@ app.MapGet("/api/auth/csrf", (HttpContext c, IAntiforgery csrf) => Results.Ok(ne
 app.MapAuth();
 app.MapCatalog();
 app.MapCommerce();
+app.MapFallbackToFile("index.html");
 if (app.Environment.IsDevelopment()) app.MapOpenApi("/api/openapi/{documentName}.json");
 if (!app.Environment.IsEnvironment("Testing") && builder.Configuration.GetValue<bool>("Seed:Demo"))
 {
