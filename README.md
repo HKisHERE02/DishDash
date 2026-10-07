@@ -26,11 +26,21 @@ Accounts include persistent sign-in, dietary preferences, allergen exclusions, f
 
 ## Screenshots
 
-![Dish discovery](docs/screenshots/discover-desktop.png)
+### Discover
 
-More views: [Cook vs Order comparison](docs/screenshots/comparison-desktop.png) · [Mobile discovery](docs/screenshots/discover-mobile.png).
+![DishDash discovery](docs/screenshots/discover-desktop.png)
 
-The current screenshots were captured during application validation. Photography is illustrative and may differ from the recipe.
+### Cook vs Order
+
+![Cook vs Order comparison](docs/screenshots/comparison-desktop.png)
+
+### Mobile experience
+
+<img src="docs/screenshots/discover-mobile.png" alt="DishDash mobile discovery" width="320">
+
+Additional views: [Demo checkout](docs/screenshots/checkout-desktop.png) · [Order tracking](docs/screenshots/orders-desktop.png).
+
+Screenshots show the live production application. Restaurant and grocery providers, payments and delivery updates remain explicit simulations. Photography is illustrative and may differ from the recipe.
 
 ## Architecture
 
